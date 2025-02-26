@@ -19,7 +19,7 @@ type Config struct {
 
 var AppConfig *Config
 
-func LoadConfig() {
+func LoadEnv() {
 	viper.AutomaticEnv()
 
 	AppConfig = &Config{
