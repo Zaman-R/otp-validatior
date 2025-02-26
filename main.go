@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	config.LoadEnv()
+	config.LoadConfig()
 	config.ConnectDB()
 
 }

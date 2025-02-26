@@ -19,9 +19,17 @@ type Config struct {
 
 var AppConfig *Config
 
-func LoadEnv() {
-	viper.AutomaticEnv()
+func LoadConfig() {
+	viper.AddConfigPath(".")
+	viper.SetConfigFile(".env")
+	viper.SetConfigType("env")
 
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalf("Error reading config file, %s", err)
+	}
+
+	viper.AutomaticEnv()
 	AppConfig = &Config{
 		DBDriver:   viper.GetString("DB_DRIVER"),
 		DBHost:     viper.GetString("DB_HOST"),

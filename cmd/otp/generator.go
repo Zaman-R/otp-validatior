@@ -3,56 +3,92 @@ package otp
 import (
 	"crypto/rand"
 	"encoding/json"
-	"errors"
+	"github.com/google/uuid"
+	"github.com/oklog/ulid"
+	"golang.org/x/crypto/bcrypt"
 	"math/big"
 	"time"
 )
 
-type OTPConfig struct {
-	Length       int
-	Expiry       time.Duration
-	AllowedChars string
-}
-
-var DefaultOTPConfig = OTPConfig{
-	Length:       6,
-	Expiry:       5 * time.Hour,
-	AllowedChars: "0123456789",
-}
-
-func GenerateOTP(config OTPConfig) (string, error) {
-	if config.Length <= 0 {
-		return "", errors.New("invalid OTP length")
+func IfNotNil(s *string) string {
+	if s != nil {
+		return *s
 	}
-	otp := make([]byte, config.Length)
-	charLen := big.NewInt(int64(len(config.AllowedChars)))
+	return ""
+}
 
+func GenerateNumericOTP(length int) (string, error) {
+	otp := make([]byte, length)
 	for i := range otp {
-		randIndex, err := rand.Int(rand.Reader, charLen)
+		num, err := rand.Int(rand.Reader, big.NewInt(10))
 		if err != nil {
 			return "", err
 		}
-		otp[i] = config.AllowedChars[randIndex.Int64()]
+		otp[i] = '0' + byte(num.Int64())
 	}
-
 	return string(otp), nil
 }
 
-func ParseOTPConfig(otp string) (OTPConfig, error) {
-	var config OTPConfig
-	if err := json.Unmarshal([]byte(otp), &config); err != nil {
-		return DefaultOTPConfig, err
+func HashOTP(otp string) (string, error) {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(otp), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashed), nil
+}
+
+func GenerateOTP(
+	purpose string,
+	delivery DeliveryMethod,
+	mobile *string,
+	email *string,
+	payload map[string]interface{},
+	smsBody *string,
+	emailBody *string,
+	length int,
+	expirationSeconds int,
+	retryLimit int,
+
+) (*OTP, string, error) {
+
+	rawOTP, err := GenerateNumericOTP(length)
+	if err != nil {
+		return nil, "", err
 	}
 
-	if config.Length == 0 {
-		config.Length = DefaultOTPConfig.Length
-	}
-	if config.Expiry == 0 {
-		config.Expiry = DefaultOTPConfig.Expiry
-	}
-	if config.AllowedChars == "" {
-		config.AllowedChars = DefaultOTPConfig.AllowedChars
+	hashedOTP, err := HashOTP(rawOTP)
+	if err != nil {
+		return nil, "", err
 	}
 
-	return config, nil
+	now := time.Now()
+	expiresAt := now.Add(time.Duration(expirationSeconds) * time.Second)
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return nil, "", err
+	}
+
+	otp := &OTP{
+		ID:           uuid.New(),
+		Purpose:      purpose,
+		HashedOTP:    hashedOTP,
+		Delivery:     string(delivery),
+		MobileNumber: IfNotNil(mobile),
+		Email:        IfNotNil(email),
+		Payload:      string(payloadBytes),
+		SMSContent:   IfNotNil(smsBody),
+		EmailContent: IfNotNil(emailBody),
+		CreatedAt:    now,
+		ExpiresAt:    expiresAt,
+		RetryLimit:   retryLimit,
+	}
+
+	return otp, rawOTP, nil
+}
+
+func generateULID() string {
+	t := time.Now()
+	entropy := ulid.Monotonic(rand.Reader, 0)
+	return ulid.MustNew(ulid.Timestamp(t), entropy).String()
 }
