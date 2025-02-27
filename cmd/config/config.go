@@ -11,10 +11,15 @@ type OTPConfig struct {
 	ExpirationSeconds int      `json:"expiration_seconds" yaml:"expiration_seconds"`
 	RetryLimit        int      `json:"retry_limit" yaml:"retry_limit"`
 	AllowedDeliveries []string `json:"allowed_delivery_methods" yaml:"allowed_delivery_methods"`
-	EnableTOTP        bool     `json:"enable_totp" yaml:"enable_totp"`               // ✅  Enable TOTP
-	TOTPSecretLength  int      `json:"totp_secret_length" yaml:"totp_secret_length"` // ✅  Secret length
-	TOTPIssuer        string   `json:"totp_issuer" yaml:"totp_issuer"`               // ✅  Issuer name for QR code
-	TOTPPeriod        int      `json:"totp_period" yaml:"totp_period"`               // ✅  TOTP validity period
+}
+
+type TOTPConfig struct {
+	Issuer     string `json:"issuer" yaml:"issuer"`
+	Digits     int    `json:"digits" yaml:"digits"`
+	Period     int    `json:"period" yaml:"period"`
+	Skew       int    `json:"skew" yaml:"skew"`
+	SecretSize int    `json:"secret_size" yaml:"secret_size"`
+	Algorithm  string `json:"algorithm" yaml:"algorithm"`
 }
 
 type Config struct {
@@ -30,6 +35,8 @@ type Config struct {
 
 var AppConfig *Config
 var ConfigOTP *OTPConfig
+var ConfigTOTP *TOTPConfig
+var isTOTPEnabled bool
 
 func LoadConfig() {
 	viper.AddConfigPath(".")
@@ -59,11 +66,22 @@ func LoadConfig() {
 		ExpirationSeconds: viper.GetInt("OTP_EXPIRATION_SECONDS"),
 		RetryLimit:        viper.GetInt("OTP_RETRY_LIMIT"),
 		AllowedDeliveries: viper.GetStringSlice("OTP_ALLOWED_DELIVERY"),
-		EnableTOTP:        viper.GetBool("ENABLE_TOTP"),
-		TOTPSecretLength:  viper.GetInt("TOTP_SECRET_LENGTH"),
-		TOTPIssuer:        viper.GetString("TOTP_ISSUER"),
-		TOTPPeriod:        viper.GetInt("TOTP_PERIOD"),
 	}
 
+	ConfigTOTP = &TOTPConfig{
+		Issuer:     viper.GetString("TOTP_ISSUER"),
+		Digits:     viper.GetInt("TOTP_DIGITS"),
+		Period:     viper.GetInt("TOTP_PERIOD"),
+		Skew:       viper.GetInt("TOTP_SKEW"),
+		SecretSize: viper.GetInt("TOTP_SECRET_SIZE"),
+		Algorithm:  viper.GetString("TOTP_ALGORITHM"),
+	}
+
+	isTOTPEnabled = viper.GetBool("TOTP_ENABLED")
+
 	log.Println("✅ Configuration loaded successfully")
+}
+
+func TOTPEnabled() bool {
+	return isTOTPEnabled
 }
