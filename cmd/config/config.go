@@ -1,10 +1,21 @@
 package config
 
 import (
-	"log"
-
 	"github.com/spf13/viper"
+	"log"
 )
+
+type OTPConfig struct {
+	MinLength         int      `json:"min_length" yaml:"min_length"`
+	MaxLength         int      `json:"max_length" yaml:"max_length"`
+	ExpirationSeconds int      `json:"expiration_seconds" yaml:"expiration_seconds"`
+	RetryLimit        int      `json:"retry_limit" yaml:"retry_limit"`
+	AllowedDeliveries []string `json:"allowed_delivery_methods" yaml:"allowed_delivery_methods"`
+	EnableTOTP        bool     `json:"enable_totp" yaml:"enable_totp"`               // ✅  Enable TOTP
+	TOTPSecretLength  int      `json:"totp_secret_length" yaml:"totp_secret_length"` // ✅  Secret length
+	TOTPIssuer        string   `json:"totp_issuer" yaml:"totp_issuer"`               // ✅  Issuer name for QR code
+	TOTPPeriod        int      `json:"totp_period" yaml:"totp_period"`               // ✅  TOTP validity period
+}
 
 type Config struct {
 	DBDriver   string
@@ -18,6 +29,7 @@ type Config struct {
 }
 
 var AppConfig *Config
+var ConfigOTP *OTPConfig
 
 func LoadConfig() {
 	viper.AddConfigPath(".")
@@ -39,6 +51,18 @@ func LoadConfig() {
 		DBPort:     viper.GetString("DB_PORT"),
 		SSLMode:    viper.GetString("SSL_MODE"),
 		TimeZone:   viper.GetString("TIME_ZONE"),
+	}
+
+	ConfigOTP = &OTPConfig{
+		MinLength:         viper.GetInt("OTP_MIN_LENGTH"),
+		MaxLength:         viper.GetInt("OTP_MAX_LENGTH"),
+		ExpirationSeconds: viper.GetInt("OTP_EXPIRATION_SECONDS"),
+		RetryLimit:        viper.GetInt("OTP_RETRY_LIMIT"),
+		AllowedDeliveries: viper.GetStringSlice("OTP_ALLOWED_DELIVERY"),
+		EnableTOTP:        viper.GetBool("ENABLE_TOTP"),
+		TOTPSecretLength:  viper.GetInt("TOTP_SECRET_LENGTH"),
+		TOTPIssuer:        viper.GetString("TOTP_ISSUER"),
+		TOTPPeriod:        viper.GetInt("TOTP_PERIOD"),
 	}
 
 	log.Println("✅ Configuration loaded successfully")

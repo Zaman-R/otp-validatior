@@ -37,11 +37,3 @@ type OTP struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
-
-type OTPConfig struct {
-	MinLength         int      `json:"min_length" yaml:"min_length"`
-	MaxLength         int      `json:"max_length" yaml:"max_length"`
-	ExpirationSeconds int      `json:"expiration_seconds" yaml:"expiration_seconds"`
-	RetryLimit        int      `json:"retry_limit" yaml:"retry_limit"`
-	AllowedDeliveries []string `json:"allowed_delivery_methods" yaml:"allowed_delivery_methods"`
-}
