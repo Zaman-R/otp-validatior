@@ -26,7 +26,7 @@ func NewRegistry() *Registry {
 
 	if !config.TOTPEnabled() {
 		var err error
-		otpService, err = otp.NewOTPService(db.GetDB())
+		otpService = otp.NewOTPService(db.GetDB())
 		if err != nil {
 			log.Panic("❌ Failed to initialize OTP service:", err)
 		}
