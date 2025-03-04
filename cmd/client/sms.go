@@ -10,9 +10,12 @@ type SMSProvider interface {
 	SendSMS(phone, otp string) error
 }
 
-type CustomSMS struct{}
+type CustomSMSProvider struct{}
 
-func (c *CustomSMS) SendSMS(phone, otp string) error {
+func NewCustomSMSProvider() *CustomSMSProvider {
+	return &CustomSMSProvider{}
+}
+func (c *CustomSMSProvider) SendSMS(phone, otp string) error {
 	fmt.Printf("Sending SMS to %s: Your OTP is %s\n", phone, otp)
 	return errors.New("not Implemented")
 }

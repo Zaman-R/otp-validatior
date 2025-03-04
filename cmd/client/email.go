@@ -10,9 +10,12 @@ type EmailProvider interface {
 	SendEmail(email, otp string) error
 }
 
-type CustomEmail struct{}
+type CustomEmailProvider struct{}
 
-func (c *CustomEmail) SendEmail(email, otp string) error {
+func NewCustomEmailProvider() *CustomEmailProvider {
+	return &CustomEmailProvider{}
+}
+func (c *CustomEmailProvider) SendEmail(email, otp string) error {
 	fmt.Printf("Sending Email to %s: Your OTP is %s\n", email, otp)
 	return errors.New("not Implemented")
 }
