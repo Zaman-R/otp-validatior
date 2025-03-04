@@ -3,8 +3,10 @@ module github.com/Zaman-R/otp-validator
 go 1.23.1
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.4.0
 	github.com/oklog/ulid v1.3.1
+	github.com/pquerna/otp v1.4.0
 	github.com/spf13/viper v1.19.0
 	golang.org/x/crypto v0.21.0
 	gorm.io/driver/mysql v1.5.7
@@ -26,7 +28,6 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
-	github.com/pquerna/otp v1.4.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
