@@ -3,6 +3,7 @@ package otp
 import (
 	"errors"
 	"fmt"
+	"github.com/Zaman-R/otp-validator/cmd/client"
 	"time"
 
 	"github.com/Zaman-R/otp-validator/cmd/utils"
@@ -11,12 +12,18 @@ import (
 
 // OTPService handles OTP generation, validation, and sending.
 type OTPService struct {
-	repo *OTPRepository
+	repo          *OTPRepository
+	smsProvider   client.SMSProvider
+	emailProvider client.EmailProvider
 }
 
 // NewOTPService initializes a new OTPService.
-func NewOTPService(repo *OTPRepository) *OTPService {
-	return &OTPService{repo: repo}
+func NewOTPService(repo *OTPRepository, smsProvider client.SMSProvider, emailProvider client.EmailProvider) *OTPService {
+	return &OTPService{
+		repo:          repo,
+		smsProvider:   smsProvider,
+		emailProvider: emailProvider,
+	}
 }
 
 func (s *OTPService) IsOTPExpired(otp OTP) bool {
@@ -133,15 +140,15 @@ func (s *OTPService) SendOTP(req SendOTPRequest) (string, error) {
 		return "", fmt.Errorf("failed to generate token: %v", err)
 	}
 
-	if req.MobileNumber != nil {
-		err = utils.SendSMS(*req.MobileNumber, smsBody)
+	if req.MobileNumber != nil && s.smsProvider != nil {
+		err = s.smsProvider.SendSMS(*req.MobileNumber, smsBody)
 		if err != nil {
 			fmt.Printf("Failed to send SMS: %v\n", err)
 		}
 	}
 
-	if req.Email != nil {
-		err = utils.SendEmail(*req.Email, emailBody)
+	if req.Email != nil && s.emailProvider != nil {
+		err = s.emailProvider.SendEmail(*req.Email, emailBody)
 		if err != nil {
 			fmt.Printf("Failed to send Email: %v\n", err)
 		}

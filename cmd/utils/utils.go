@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"math/rand"
@@ -97,16 +96,6 @@ func DecodeBase64(encodedStr string) (map[string]interface{}, error) {
 		return nil, err
 	}
 	return decodedPayload, nil
-}
-
-func SendSMS(phone, otp string) error {
-	fmt.Printf("Sending SMS to %s: Your OTP is %s\n", phone, otp)
-	return errors.New("not Implemented")
-}
-
-func SendEmail(email, otp string) error {
-	fmt.Printf("Sending Email to %s: Your OTP is %s\n", email, otp)
-	return errors.New("not Implemented")
 }
 
 func Contains(str, substr string) bool {
