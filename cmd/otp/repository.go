@@ -47,10 +47,12 @@ func (r *OTPRepository) ExpireOTP(id uuid.UUID) error {
 			"updated_at": time.Now(),
 		}).Error
 }
+
 func (r *OTPRepository) UpdateRetryLimit(id uuid.UUID) error {
 	return r.db.Model(&OTP{}).Where("id = ?", id).
 		UpdateColumn("retry_count", gorm.Expr("retry_count + ?", 1)).Error
 }
+
 func (r *OTPRepository) MarkOTPAsUsed(id uuid.UUID) error {
 	return r.db.Model(&OTP{}).Where("id = ?", id).
 		Update("status", OTPStatusUsed).Error

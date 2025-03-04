@@ -49,7 +49,6 @@ func generateSecret() (string, error) {
 	return base32.StdEncoding.EncodeToString(key), nil
 }
 
-// GenerateTOTP generates a TOTP code using the secret.
 func (s *TOTPService) GenerateTOTP() (string, error) {
 	code, err := totp.GenerateCodeCustom(s.Secret, time.Now(), totp.ValidateOpts{
 		Period:    30,
@@ -63,12 +62,10 @@ func (s *TOTPService) GenerateTOTP() (string, error) {
 	return code, nil
 }
 
-// VerifyTOTP verifies a TOTP code against the stored secret.
 func (s *TOTPService) VerifyTOTP(code string) bool {
 	return totp.Validate(code, s.Secret)
 }
 
-// GenerateTOTPURL generates a URL for configuring an authenticator app.
 func (s *TOTPService) GenerateTOTPURL() (string, error) {
 	key, err := otp.NewKeyFromURL(fmt.Sprintf("otpauth://totp/%s:%s?secret=%s&issuer=%s",
 		s.Issuer, s.AccountName, s.Secret, s.Issuer))
@@ -78,7 +75,6 @@ func (s *TOTPService) GenerateTOTPURL() (string, error) {
 	return key.URL(), nil
 }
 
-// HOTP (optional) - Can be used for counter-based OTP if needed.
 func GenerateHOTP(secret string, counter uint64) (string, error) {
 	hmacHash := hmac.New(sha1.New, []byte(secret))
 	_, err := hmacHash.Write([]byte(fmt.Sprintf("%d", counter)))
@@ -93,6 +89,6 @@ func GenerateHOTP(secret string, counter uint64) (string, error) {
 		(int(hash[offset+2])&0xFF)<<8 |
 		(int(hash[offset+3]) & 0xFF)
 
-	otp := binary % int(math.Pow10(6)) // 6-digit code
+	otp := binary % int(math.Pow10(6))
 	return fmt.Sprintf("%06d", otp), nil
 }
